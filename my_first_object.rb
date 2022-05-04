@@ -82,9 +82,17 @@ class GoodDog
   end
 end
 
+class Robot ; end
 
-serj = GoodDog.new("Serj", '7 feet', '260lbs', 7)
-puts GoodDog.what_is_self
+one_one = Robot.new
+bb8 = Robot.new
+
+puts one_one == bb8
+
+
+
+# serj = GoodDog.new("Serj", '7 feet', '260lbs', 7)
+# puts GoodDog.what_is_self
 # puts serj.what_is_self
 
 # serj.change_info("Piper", '1 cm', '1 g')
