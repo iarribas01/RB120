@@ -37,18 +37,42 @@ end
 
 =end
   def wrap_text
-    # returns an array of strings less than or equal to width
+
+    # To boldly go where no one has gone before. 
+    substr = ""
     wrapped_text = []
-    start_index = 0
-    temp = message.dup
-    loop do
-      substr = temp[/.{1,10}\s/]
-      puts substr
-      wrapped_text << substr
-      temp = temp[substr.length, 100]
-      # puts temp
-      break if temp == nil || temp.length <= 0
+    # split the message by whitespaces and iterate through each word
+    words = message.split.each do |word| # iterate through each word of this array
+      # have a current substring
+      if (substr.length + word.length < width)
+        # if this word can fit, (if the length of word + substring is less than desired width)
+        substr << (word + ' ') # add the word to the substring
+      else # if it can't
+        if substr.empty?
+        # yes
+          loop do
+            substr = word[0, width] # get the substring of this word (length = width)
+            word = word[width, word.length]
+            wrapped_text << substr # add substr to wrapped text
+            if word.length < width # loop this until left with a substring with length less than width
+              substr = word # set substring equal to remaining
+              break
+            end
+          end
+        else
+        # no 
+          wrapped_text << substr.strip # add substring to wrapped text
+          substr = "" # reset substring to be empty
+        end
+      end
+      
+        
+    # continue until end of string is reached
+    # add the remaining bit of substring to the wrapped_text array
+    # return the a string of the array joined by newline
     end
+  wrapped_text << substr
+    p wrapped_text
   end
 
 
