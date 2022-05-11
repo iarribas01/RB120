@@ -43,9 +43,9 @@ end
     wrapped_text = []
     # split the message by whitespaces and iterate through each word
     words = message.split.each do |word| # iterate through each word of this array
+      puts "#{word} : #{word.length}"
       # have a current substring
-      if (substr.length + word.length < width)
-        # if this word can fit, (if the length of word + substring is less than desired width)
+      if (substr.length + word.length < width) # if this word can fit, (if the length of word + substring + ' ' is less than desired width)
         substr << (word + ' ') # add the word to the substring
       else # if it can't
         if substr.empty?
@@ -65,16 +65,18 @@ end
           substr = "" # reset substring to be empty
         end
       end
-      
-        
     # continue until end of string is reached
     # add the remaining bit of substring to the wrapped_text array
     # return the a string of the array joined by newline
     end
-  wrapped_text << substr
+    p substr
+    # wrapped_text << substr
     p wrapped_text
   end
 
+
+  ##### note: debug --- need to check how to add in the last string after splitting 
+  # the message into an array
 
   private
 
