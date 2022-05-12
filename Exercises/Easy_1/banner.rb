@@ -64,6 +64,9 @@ class Banner
   end
 
 
+  def test
+    "| #{message.center(@width)} |"
+  end
   ##### note: debug --- need to check how to add in the last string after splitting 
   # the message into an array
 
@@ -87,9 +90,9 @@ class Banner
   attr_reader :message, :width
 end
 
-banner = Banner.new('To boldly go where no one has gone before.', 30)
+banner = Banner.new('To boldly go where no one has gone before.', 10)
 # puts banner
-puts banner
+puts banner.test
 # +--------------------------------------------+
 # |                                            |
 # | To boldly go where no one has gone before. |
