@@ -1,5 +1,12 @@
-##### STILL NEED TO COMPLETE
-## FURTHER EXPLORATION
+=begin 
+  * messy solution, definitely needs refactoring and handling edge case
+  * last updated 12.5.22
+
+=end
+
+
+
+require 'pry'
 
 class Banner
 
@@ -12,66 +19,48 @@ class Banner
     if @width == @message.length
       [horizontal_rule, empty_line, message_line, empty_line, horizontal_rule].join("\n")
     else 
-      wrap_text
+      [horizontal_rule, empty_line, wrap_text, empty_line, horizontal_rule].join("\n")
     end
   end
 
-
-=begin 
-create an empty array
-initialize start index to 0
-
-loop until start index is equal or past messsage length
-	check if end INDEX is in middle of word
-	if in middle
-		generate substring up to whitespace
-    if no witespace, just take the substring in the middle
-	if not in middle
-		generate the substring
-		trim any whitespace
-		add this new substring to the wrapped array
-	end
-
-	reassign start index to substring's length
-end
-
-=end
   def wrap_text
-
     # To boldly go where no one has gone before. 
-    substr = ""
+    # ["To", "boldly", "go", "where", "no", "one", "has", "gone", "before."]
+    # word = "To", substr = ""
+    # wor
     wrapped_text = []
-    # split the message by whitespaces and iterate through each word
-    words = message.split.each do |word| # iterate through each word of this array
-      puts "#{word} : #{word.length}"
-      # have a current substring
-      if (substr.length + word.length < width) # if this word can fit, (if the length of word + substring + ' ' is less than desired width)
-        substr << (word + ' ') # add the word to the substring
+    words = message.split # split the message by whitespaces and iterate through each word
+    wrapped_text << words.shift + ' '
+    words.each do |word| # iterate through each word of this array
+      if (wrapped_text.last.length + word.length < width) # if this word can fit, (if the length of word + substring + ' ' is less than desired width)
+        wrapped_text.last << (word + ' ') # add the word to the substring
       else # if it can't
-        if substr.empty?
-        # yes
-          loop do
-            substr = word[0, width] # get the substring of this word (length = width)
-            word = word[width, word.length]
-            wrapped_text << substr # add substr to wrapped text
-            if word.length < width # loop this until left with a substring with length less than width
-              substr = word # set substring equal to remaining
-              break
-            end
+        if word.length > width # if the current word can't even fit in the width
+          loop do # keep wrapping until it can
+            # substr = word[0, width] # get the substring of this word (length = width)
+            # word = word[width, word.length]
+            # wrapped_text << substr # add substr to wrapped text
+            # if word.length < width # loop this until left with a substring with length less than width
+            #   substr = word # set substring equal to remaining
+            #   break
+            # end
+            puts "word can't fit!"
+            wrapped_text << (word + ' ') # append new element to array
+            break
           end
         else
-        # no 
-          wrapped_text << substr.strip # add substring to wrapped text
-          substr = "" # reset substring to be empty
+          wrapped_text.last.strip! # add substring to wrapped text
+          wrapped_text << (word + ' ') # append new element to array
         end
       end
     # continue until end of string is reached
     # add the remaining bit of substring to the wrapped_text array
     # return the a string of the array joined by newline
     end
-    p substr
     # wrapped_text << substr
-    p wrapped_text
+    wrapped_text.map! do |line|
+      line.strip.center(width + 2).center(width + 4, '|')
+    end.join("\n")
   end
 
 
@@ -98,9 +87,9 @@ end
   attr_reader :message, :width
 end
 
-banner = Banner.new('To boldly go where no one has gone before.', 10)
+banner = Banner.new('To boldly go where no one has gone before.', 30)
 # puts banner
-banner.wrap_text
+puts banner
 # +--------------------------------------------+
 # |                                            |
 # | To boldly go where no one has gone before. |
