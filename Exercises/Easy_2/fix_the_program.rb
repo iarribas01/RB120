@@ -3,6 +3,7 @@ Covering questions:
 
   Fix the program - Mailable
   Fix the program - Drivable
+  Fix the program - Expander
 =end
 
 # module Mailable
@@ -35,19 +36,46 @@ Covering questions:
 ##############################
 
 
-module Drivable
-  def self.drive
+# module Drivable
+#   def self.drive
+#   end
+
+#   # def drive
+#   # end
+# end
+
+# class Car
+#   include Drivable
+# end
+
+# bobs_car = Car.new
+# # bobs_car.drive
+
+# Drivable.drive
+
+
+
+
+
+##############################
+
+class Expander
+  def initialize(string)
+    @string = string
   end
 
-  # def drive
-  # end
+  def to_s
+    expand(3)
+  end
+
+  private
+
+  attr_reader :string
+
+  def self.expand(n)
+    string * n
+  end
 end
 
-class Car
-  include Drivable
-end
-
-bobs_car = Car.new
-# bobs_car.drive
-
-Drivable.drive
+expander = Expander.new('xyz')
+puts expander
