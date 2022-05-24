@@ -23,11 +23,56 @@ move
 compare
 
 =end
+class Move
+  VALUES = ['rock', 'paper', 'scissors']
 
+  def initialize(choice)
+    @value = choice
+  end
+
+  def scissors?
+    @value == 'scissors'
+  end
+  def rock?
+    @value == 'rock'
+  end
+  def paper?
+    @value == 'paper'
+  end
+
+  def <(other_move)    
+    if rock?
+      return true if other_move.paper?
+      return false
+    elsif paper?
+      return true if other_move.scissors?
+      return false
+    elsif scissors?
+      return true if other_move.rock?
+      return false
+    end
+  end
+
+  def >(other_move)    
+    if rock?
+      return true if other_move.scissors?
+      return false
+    elsif paper?
+      return true if other_move.rock?
+      return false
+    elsif scissors?
+      return true if other_move.paper?
+      return false
+    end
+  end
+
+  def to_s
+    @value
+  end
+end
 
 class Player 
   attr_accessor :move, :name
-
 
   def initialize
     set_name
@@ -51,10 +96,10 @@ class Human < Player
     loop do
       puts "Please choose rock, paper, or scissors: "
       choice = gets.chomp
-      break if  ['rock','paper','scissors'].include? choice
+      break if  Move::VALUES.include? choice
       puts "Sorry, invalid choice."
     end
-    self.move = choice
+    self.move = Move.new(choice)
   end
 end
 
@@ -64,7 +109,7 @@ class Computer < Player
   end
 
   def choose
-    self.move = ['rock','paper','scissors'].sample
+    self.move = Move.new(Move::VALUES.sample)
   end
 end
 
@@ -89,19 +134,13 @@ class RPSGame
     puts "#{human.name} chose #{human.move}."
     puts "#{computer.name} chose #{computer.move}."
 
-    case human.move
-    when 'rock'
-      puts "It's a tie!" if computer.move == 'rock'
-      puts "#{human.name} won!" if computer.move == 'scissors'
-      puts "#{computer.name} won!" if computer.move == 'paper'
-    when 'paper'
-      puts "It's a tie!" if computer.move == 'paper'
-      puts "#{human.name} won!" if computer.move == 'rock'
-      puts "#{computer.name} won!" if computer.move == 'scissors'
-    when 'scissors'
-      puts "It's a tie!" if computer.move == 'scissors'
-      puts "#{human.name} won!" if computer.move == 'paper'
-      puts "#{computer.name} won!" if computer.move == 'rock'
+
+    if human.move > computer.move
+      puts "#{human.name} won!"
+    elsif human.move < computer.move
+      puts "#{computer.name} won!"
+    else
+      puts "It's a tie!"
     end
   end
 
@@ -130,3 +169,52 @@ end
 
 
 RPSGame.new.play
+
+=begin 
+Ending questions (OOP walkthrough Design Choice 1)
+
+1. is this design, with Human and Computer sub-classes, better? Why, or why not?
+
+  This design is a lot better because this structure utilizes OOP to break down
+  concepts into easy to understand chunks of information. This structure reflects
+  a naturally hierarchical relationship between players and humans/computer.
+
+  Some advantages now is that the program is easily flexible. Now, we can very
+  easily make both players computers or both players human. It is also very easy
+  to read the program (encapsulating allows us to build more layers of abstraction).
+
+
+
+2. what is the primary improvement of this new design?
+
+  Since the functionality of the program has not changed, the primary improvement
+  of this design is readability, which is a very imporant component of writing code
+  in large scale development projects.
+
+
+
+3. what is the primary drawback of this new design?
+
+  Perhaps creates a rigid separate between Humans and Computers when
+  there are many similarities between the two for this game?
+
+######################################################
+
+Ending questions (OOP walkthrough Design Choice 2)
+1. what is the primary improvement of this new design?
+  This code is more flexible. It allows us to easily change the values
+  of 'rock', 'paper', and 'scissors' if we wanted, and possibly add more.
+  We've removed some hard coded parts of the program.
+
+
+2. what is the primary drawback of this new design?
+  The primary drawback is that it's actually less readable.
+  Now, when we look at values called within the code, from the
+  standpoint of someone who has never seen this code before, using
+  Move::VALUES instead of just ['rock', 'paper', 'scissors'] looks
+  confusing at a glance.
+
+  minor drawbacks: method overriding comes at a cost because there
+  may be other features you would rather compare with < > methods and
+  other features you would rather see displayed than the to_s we implemented.
+=end
