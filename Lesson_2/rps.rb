@@ -1,28 +1,3 @@
-=begin
-1. Write description
-Rock, Paper, Scissors is a two-player game where each player chooses
-one of three possible moves: rock, paper, or scissors. The chosen moves
-will then be compared to see who wins, according to the following rules:
-
-- rock beats scissors
-- scissors beats paper
-- paper beats rock
-
-If the players chose the same move, then it's a tie.
-
-
-2. Determine nouns and verbs
-  - nouns: rule, player, move
-  - verbs: compare, choose
-
-3. Organize verbs with nouns
-rule
-player - move
-move
-
-compare
-
-=end
 class Move
   VALUES = ['rock', 'paper', 'scissors']
 
@@ -33,37 +8,25 @@ class Move
   def scissors?
     @value == 'scissors'
   end
+
   def rock?
     @value == 'rock'
   end
+
   def paper?
     @value == 'paper'
   end
 
-  def <(other_move)    
-    if rock?
-      return true if other_move.paper?
-      return false
-    elsif paper?
-      return true if other_move.scissors?
-      return false
-    elsif scissors?
-      return true if other_move.rock?
-      return false
-    end
+  def <(other_move)
+    (rock? && other_move.paper?) ||
+      (paper? && other_move.scissors?) ||
+      (scissors? && other_move.rock?)
   end
 
-  def >(other_move)    
-    if rock?
-      return true if other_move.scissors?
-      return false
-    elsif paper?
-      return true if other_move.rock?
-      return false
-    elsif scissors?
-      return true if other_move.paper?
-      return false
-    end
+  def >(other_move)
+    (rock? && other_move.scissors?) ||
+      (paper? && other_move.rock?) ||
+      (scissors? && other_move.paper?)
   end
 
   def to_s
@@ -71,7 +34,7 @@ class Move
   end
 end
 
-class Player 
+class Player
   attr_accessor :move, :name
 
   def initialize
@@ -82,7 +45,7 @@ end
 class Human < Player
   def set_name
     n = nil
-    loop do 
+    loop do
       puts "What's your name?"
       n = gets.chomp
       break unless n.empty?
@@ -96,7 +59,7 @@ class Human < Player
     loop do
       puts "Please choose rock, paper, or scissors: "
       choice = gets.chomp
-      break if  Move::VALUES.include? choice
+      break if Move::VALUES.include? choice
       puts "Sorry, invalid choice."
     end
     self.move = Move.new(choice)
@@ -105,14 +68,13 @@ end
 
 class Computer < Player
   def set_name
-    self.name = ['One-One','Alexa','Siri'].sample
+    self.name = ['One-One', 'Alexa', 'Siri'].sample
   end
 
   def choose
     self.move = Move.new(Move::VALUES.sample)
   end
 end
-
 
 class RPSGame
   attr_accessor :human, :computer
@@ -130,10 +92,13 @@ class RPSGame
     puts "Thanks for playing Rock, Paper, Scissors!"
   end
 
-  def display_winner
+  def display_moves
     puts "#{human.name} chose #{human.move}."
     puts "#{computer.name} chose #{computer.move}."
+  end
 
+  def display_winner
+    display_moves
 
     if human.move > computer.move
       puts "#{human.name} won!"
@@ -152,7 +117,7 @@ class RPSGame
       break if ['y', 'n'].include? answer.downcase
       puts "Sorry, must be y or n."
     end
-    answer == 'y'
+    answer.downcase == 'y'
   end
 
   def play
@@ -167,28 +132,62 @@ class RPSGame
   end
 end
 
-
 RPSGame.new.play
 
-=begin 
+=begin
+
+1. Write description
+Rock, Paper, Scissors is a two-player game where each player chooses
+one of three possible moves: rock, paper, or scissors. The chosen moves
+will then be compared to see who wins, according to the following rules:
+
+- rock beats scissors
+- scissors beats paper
+- paper beats rock
+
+If the players chose the same move, then it's a tie.
+
+2. Determine nouns and verbs
+  - nouns: rule, player, move
+  - verbs: compare, choose
+
+3. Organize verbs with nouns
+rule
+player - move
+move
+
+compare
+
+##############################
+
+
 Ending questions (OOP walkthrough Design Choice 1)
 
 1. is this design, with Human and Computer sub-classes, better? Why, or why not?
 
-  This design is a lot better because this structure utilizes OOP to break down
-  concepts into easy to understand chunks of information. This structure reflects
-  a naturally hierarchical relationship between players and humans/computer.
+  This design is a lot better because this
+  structure utilizes OOP to break down
+  concepts into easy to understand
+   of information. This structure reflects
+  a naturally hierarchical relationship
+  between players and humans/computer.
 
-  Some advantages now is that the program is easily flexible. Now, we can very
-  easily make both players computers or both players human. It is also very easy
-  to read the program (encapsulating allows us to build more layers of abstraction).
+  Some advantages now is that the program
+  is easily flexible. Now, we can very
+  easily make both players computers or
+  both players human. It is also very easy
+  to read the program (encapsulating
+    allows us to build more layers of abstraction).
 
 
 
 2. what is the primary improvement of this new design?
 
-  Since the functionality of the program has not changed, the primary improvement
-  of this design is readability, which is a very imporant component of writing code
+  Since the functionality of the program has
+  not changed, the primary improvement
+  of this design is readability,
+  which is a very imporant component of
+  writing code
   in large scale development projects.
 
 
