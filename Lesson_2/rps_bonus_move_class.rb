@@ -1,59 +1,67 @@
 =begin 
-** adding onto previous bonus feature (keeping score)
-RPS Bonus features --- Add Lizard and Spock
+** adding onto previous bonus feature (lizard and spock)
 
-Goal: implement keeping score functionality
+Goal: add a class for each move
+What would happen if we went even further and introduced 5 more 
+classes, one for each move: Rock, Paper, Scissors, Lizard, and Spock. 
+How would the code change? Can you make it work? After you're done,
+ can you talk about whether this was a good design decision? 
+ What are the pros/cons?
 
-Notes
+
+This makes the code a lot longer, but it is really good for namespacing.
+Adding in 5 individual classes for each of the moves makes it easier to
+search for a specific Move and view the characteristics of it. This should
+also make it easier to debug logical errors since there is a clear separation
+between all the different kinds of moves. The code, however, looks very redundant.
+We have to keep calling the class method to figure out what type the objects are
+rather than comparing strings. This is not much of an improvement.
 
 =end
 
 class Move
   VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
 
-  def initialize(choice)
-    @value = choice
-  end
-
-  def scissors?
-    @value == 'scissors'
-  end
-
-  def rock?
-    @value == 'rock'
-  end
-
-  def paper?
-    @value == 'paper'
-  end
-
-  def lizard?
-    @value == 'lizard'
-  end
-
-  def spock?
-    @value == 'spock'
-  end
-
-  def <(other_move)
-    (rock? && (other_move.paper? || other_move.spock?)) ||
-    (paper? && (other_move.scissors? || other_move.lizard?)) ||
-    (scissors? && (other_move.rock? || other_move.spock?)) ||
-    (lizard? && (other_move.rock? || other_move.scissors?)) ||
-    (spock? && (other_move.paper? || other_move.lizard?))
-  end
-
-  def >(other_move)
-    (rock? && (other_move.scissors? || other_move.lizard?)) ||
-    (paper? && (other_move.rock? || other_move.spock?)) ||
-    (scissors? && (other_move.paper? || other_move.lizard?)) ||
-    (lizard? && (other_move.spock? || other_move.paper?)) ||
-    (spock? && (other_move.scissors? || other_move.rock?))
+  def initialize(value)
+    @value = value
   end
 
   def to_s
-    @value
+    self.to_s
   end
+
+  def <(other_move)
+    weakness.any?(other_move.class) # possible refactored version
+  end
+
+  def >(other_move)
+    strength.any?(other_move.class)
+  end
+end
+
+class Rock < Move
+  @@weakness = [Paper, Spock]
+  @@strength = [Scissors, Lizard]
+end
+
+class Paper < Move
+  @@weakness = [Scissors, Lizard]
+  @@strength = [Rock, Spock]
+end
+
+class Scissors < Move
+  @@weakness = [Rock, Spock]
+  @@strength = [Paper, Lizard]
+end
+
+class Lizard < Move
+  @@weakness = [Rock, Scissors]
+  @@strength = [Spock, Paper]
+end
+
+class Spock < Move
+  @@weakness = [Paper, Lizard]
+  @@strength = [Scissors, Rock]
 end
 
 class Player
@@ -109,7 +117,7 @@ class RPSGame
   end
 
   def display_welcome_message
-    puts "Welcome, #{human.name} to Rock, Paper, Scissors, Lizzard, Spock!"
+    puts "Welcome, #{human.name} to Rock, Paper, Scissors, Lizard, Spock!"
   end
 
   def display_goodbye_message
@@ -141,7 +149,7 @@ class RPSGame
     elsif human.score < computer.score
       puts "#{computer.name} won Rock, Paper, Scissors, Lizard, Spock with #{computer.score} points!"
     else
-      puts "#{human.name} and #{computer.name} decided to end the game with a tie of #{human.name} points."
+      puts "#{human.name} and #{computer.name} decided to end the game with a tie of #{human.score} points."
     end
   end
 
