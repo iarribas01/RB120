@@ -8,115 +8,115 @@
 
 ##### basic object learning
 
-module Barkable ; end 
-module Swimmable ; end
+# module Barkable ; end 
+# module Swimmable ; end
 
-class Pet
-  attr_reader :age
-  HOUSE_NAME = "The Dirty Arribas House"
-  @@num_pets = 0
+# class Pet
+#   attr_reader :age
+#   HOUSE_NAME = "The Dirty Arribas House"
+#   @@num_pets = 0
 
-  def initialize(name, age, fur_type)
-    @name = name
-    @age = age
-    @fur_type = fur_type
-    @@num_pets += 1
-  end
+#   def initialize(name, age, fur_type)
+#     @name = name
+#     @age = age
+#     @fur_type = fur_type
+#     @@num_pets += 1
+#   end
 
-  # getter
-  def name
-    @name
-  end
+#   # getter
+#   def name
+#     @name
+#   end
 
-  # setter
-  def name=(new_name)
-    @name = new_name
-  end
+#   # setter
+#   def name=(new_name)
+#     @name = new_name
+#   end
 
-  # getter
-  def fur_type
-    @fur_type
-  end
+#   # getter
+#   def fur_type
+#     @fur_type
+#   end
 
-  # class variable getter
-  def self.num_pets
-    @@num_pets
-  end
+#   # class variable getter
+#   def self.num_pets
+#     @@num_pets
+#   end
   
-  # instance method
-  def happy_birthday!
-    @age += 1 # using reassignment to access variable directly
-    # self.age += 1 # this is the use of a getter method
-    puts "Whooo! Happy birthday #{@name}! They just turned #{@age} years old!"
-  end
+#   # instance method
+#   def happy_birthday!
+#     @age += 1 # using reassignment to access variable directly
+#     # self.age += 1 # this is the use of a getter method
+#     puts "Whooo! Happy birthday #{@name}! They just turned #{@age} years old!"
+#   end
 
-  # instance method
-  def is_this_an_instance_method?
-    puts "Yes! This is an instance method."
-  end
+#   # instance method
+#   def is_this_an_instance_method?
+#     puts "Yes! This is an instance method."
+#   end
 
-  # class method
-  def self.is_this_a_class_method?
-    puts "Yup! This is a class method."
-  end
+#   # class method
+#   def self.is_this_a_class_method?
+#     puts "Yup! This is a class method."
+#   end
 
-  # overriding the to_s method
-  def to_s
-    "This pet's name is #{@name} and they are #{age} years old."
-  end
+#   # overriding the to_s method
+#   def to_s
+#     "This pet's name is #{@name} and they are #{age} years old."
+#   end
 
-  # experimenting with protected accessibility
-  def compare_fur(other_pet)
-    puts "#{self.name} has #{self.fur_type} fur whereas #{other_pet.name} has #{other_pet.fur_type} fur."
-  end
+#   # experimenting with protected accessibility
+#   def compare_fur(other_pet)
+#     puts "#{self.name} has #{self.fur_type} fur whereas #{other_pet.name} has #{other_pet.fur_type} fur."
+#   end
   
-  def details 
-    "Name: #{self.name} | Class: #{self.class}"
-  end
+#   def details 
+#     "Name: #{self.name} | Class: #{self.class}"
+#   end
 
-  protected :fur_type
-end
+#   protected :fur_type
+# end
 
-class Dog < Pet
-  include Barkable
-  include Swimmable
+# class Dog < Pet
+#   include Barkable
+#   include Swimmable
 
-  # instance method
-  def beg
-    "#{name} used its puppydog eyes to beg!"
-  end
+#   # instance method
+#   def beg
+#     "#{name} used its puppydog eyes to beg!"
+#   end
 
-  def bark_at(thing)
-    "#{@name} barked at #{thing.name}."
-  end
-end
+#   def bark_at(thing)
+#     "#{@name} barked at #{thing.name}."
+#   end
+# end
 
-class GermanShep < Dog
-  def bark_at(thing1, thing2)
-    "#{@name} barked at #{thing1.name} and #{thing2.name}"
-  end
-end
+# class GermanShep < Dog
+#   def bark_at(thing1, thing2)
+#     "#{@name} barked at #{thing1.name} and #{thing2.name}"
+#   end
+# end
 
-class Shibe < Dog
-end
+# class Shibe < Dog
+# end
 
-class Cat < Pet
-  # instance method
-  def scratch
-    puts "#{@name} used scratch!"
-  end
+# class Cat < Pet
+#   # instance method
+#   def scratch
+#     puts "#{@name} used scratch!"
+#   end
 
-  # override Pet's to_s method
-  def to_s
-    super + " Mmmmmrow!"
-  end
-end
+#   # override Pet's to_s method
+#   def to_s
+#     super + " Mmmmmrow!"
+#   end
+# end
 
 
 
-# gatsby = Cat.new("Gatsby", 10, "long and silky")
-# piper = GermanShep.new("Peeps", 5, "short and wirey")
-puts GermanShep.ancestors
+# # gatsby = Cat.new("Gatsby", 10, "long and silky")
+# # piper = GermanShep.new("Peeps", 5, "short and wirey")
+# puts GermanShep.ancestors
 
 # think:
 # GermanShep
@@ -195,3 +195,33 @@ puts GermanShep.ancestors
 # what are the advantages/disadvantages of using
 # setters/getters vs accessing directly
 # what do the differences look like
+
+
+
+
+########### constant definition
+
+module Describable
+  def describe_shape
+    "I am a #{self.class} and have #{SIDES} sides."
+  end
+end
+
+class Shape
+  include Describable
+
+  def self.sides
+    puts Shape.ancestors
+    SIDES
+  end
+end
+
+class Quadrilateral < Shape
+  SIDES = 4
+end
+
+class Square < Quadrilateral; end
+
+puts Square.sides # => 4
+# Square.new.sides # => 4
+# Square.new.describe_shape # => "I am a Square and have 4 sides."
