@@ -11,8 +11,8 @@ class WheeledVehicle
   include Moveable
 
   def initialize(tire_array, km_traveled_per_liter, liters_of_fuel_capacity)
-    @fuel_efficiency = km_traveled_per_liter
-    @fuel_capacity = liters_of_fuel_capacity
+    self.fuel_efficiency = km_traveled_per_liter
+    self.fuel_capacity = liters_of_fuel_capacity
     @tires = tire_array
   end
 
@@ -39,16 +39,28 @@ class Motorcycle < WheeledVehicle
   end
 end
 
-# be able to track fuel efficiency and range
-class Catamaran
+class Seacraft
   include Moveable
-
   attr_reader :propeller_count, :hull_count
 
   def initialize(num_propellers, num_hulls, km_traveled_per_liter, liters_of_fuel_capacity)
-    @fuel_efficiency = km_traveled_per_liter
-    @fuel_capacity = liters_of_fuel_capacity
     @num_propellers = num_propellers
     @num_hulls = num_hulls
+    self.fuel_efficiency = km_traveled_per_liter
+    self.fuel_capacity = liters_of_fuel_capacity
   end
+
+  def range
+    super + 10
+  end
+end
+
+class Motorboat < Seacraft
+  def initialize(km_traveled_per_liter, liters_of_fuel_capacity)
+    super(1, 1, km_traveled_per_liter, liters_of_fuel_capacity)
+  end
+end
+
+# be able to track fuel efficiency and range
+class Catamaran < Seacraft
 end
