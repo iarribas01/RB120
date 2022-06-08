@@ -36,7 +36,7 @@ Optional - model into CRC cards
 class Board
   WINNING_LINES = [
     [1, 2, 3], [4, 5, 6], [7, 8, 9],
-    [1, 4, 6], [2, 5, 7], [3, 6, 9],
+    [1, 4, 7], [2, 5, 8], [3, 6, 9],
     [1, 5, 9], [3, 5, 7]
   ]
 
@@ -65,20 +65,38 @@ class Board
     !!detect_winner
   end
 
+  def count_human_marker(squares)
+    squares.collect(&:marker).count(TTTGame::HUMAN_MARKER)
+  end
+
+  def count_computer_marker(squares)
+    squares.collect(&:marker).count(TTTGame::COMPUTER_MARKER)
+  end
+
   # return winning marker or nil
   def detect_winner
     WINNING_LINES.each do |line|
-      if (@squares[line[0]].marker == TTTGame::HUMAN_MARKER &&
-          @squares[line[1]].marker == TTTGame::HUMAN_MARKER &&
-          @squares[line[2]].marker == TTTGame::HUMAN_MARKER)
+      if count_human_marker(@squares.values_at(*line)) == 3
         return TTTGame::HUMAN_MARKER
-      elsif (@squares[line[0]].marker == TTTGame::COMPUTER_MARKER &&
-        @squares[line[1]].marker == TTTGame::COMPUTER_MARKER &&
-        @squares[line[2]].marker == TTTGame::COMPUTER_MARKER)
+      elsif count_computer_marker(@squares.values_at(*line)) == 3
         return TTTGame::COMPUTER_MARKER
       end
+
+      # if (@squares[line[0]].marker == TTTGame::HUMAN_MARKER &&
+      #     @squares[line[1]].marker == TTTGame::HUMAN_MARKER &&
+      #     @squares[line[2]].marker == TTTGame::HUMAN_MARKER)
+      #   return TTTGame::HUMAN_MARKER
+      # elsif (@squares[line[0]].marker == TTTGame::COMPUTER_MARKER &&
+      #   @squares[line[1]].marker == TTTGame::COMPUTER_MARKER &&
+      #   @squares[line[2]].marker == TTTGame::COMPUTER_MARKER)
+      #   return TTTGame::COMPUTER_MARKER
+      # end
     end
     nil
+  end
+
+  def reset
+    (1..9).each {|key| @squares[key] = Square.new}
   end
 end
 
@@ -128,8 +146,8 @@ class TTTGame
     puts "Thanks for playing Tic Tac Toe! Goodbye!"
   end
 
-  def display_board
-    system 'clear'
+  def display_board(clear_screen = true)
+    system 'clear' if clear_screen
     puts "You're a #{human.marker}. Computer is a #{computer.marker}."
     puts ""
     puts "     |     |"
@@ -174,21 +192,40 @@ class TTTGame
     end
   end
 
+  def play_again?
+    answer = nil
+    loop do
+      puts "Would you like to play again? (y/n)"
+      answer = gets.chomp.downcase
+      break if %(y n).include? answer
+      puts "Sorry, must be y or n."
+    end
+    answer == 'y'
+  end
+
+
   def play
     display_welcome_message
-    display_board
-
+    
     loop do
-      human_moves
-      break if board.someone_won? || board.full?
-      
-      computer_moves
-      break if board.someone_won? || board.full?
+      display_board(false)
+      loop do
+        human_moves
+        break if board.someone_won? || board.full?
+        
+        computer_moves
+        break if board.someone_won? || board.full?
 
-      display_board
+        display_board
+      end
+      display_result
+      break unless play_again?
+      board.reset
+      system 'clear'
+      puts "Let's play again!"
+      puts ""
     end
-
-    display_result
+    
     display_goodbye_message
   end
 end
