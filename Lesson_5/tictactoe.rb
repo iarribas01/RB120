@@ -22,7 +22,6 @@ Organize the nouns and verbs
     - mark
     - play
 
-
 Make an initial guess at organizing the verbs
 into nouns and do a spike to explore the 
 problem with temporary code
@@ -62,15 +61,7 @@ class Board
   end
 
   def someone_won?
-    !!winning_marker(HUMAN_MARKER) || !!winning_marker(COMPUTER_MARKER)
-  end
-
-  def count_human_marker(squares)
-    squares.collect(&:marker).count(TTTGame::HUMAN_MARKER)
-  end
-
-  def count_computer_marker(squares)
-    squares.collect(&:marker).count(TTTGame::COMPUTER_MARKER)
+    !!winning_marker(TTTGame::HUMAN_MARKER) || !!winning_marker(TTTGame::COMPUTER_MARKER)
   end
 
   def winning_marker(marker)
@@ -79,20 +70,8 @@ class Board
       if three_identical_markers?(squares)
         return squares.first.marker
       end
-      
-      # if count_human_marker(@squares.values_at(*line)) == 3
-      #   return TTTGame::HUMAN_MARKER
-      # elsif count_computer_marker(@squares.values_at(*line)) == 3
-      #   return TTTGame::COMPUTER_MARKER
-      # end
     end
     nil
-  end
-
-  def three_identical_markers?(squares)
-    markers = squares.select(&:marked?).collect(&:marker)
-    return false if markers.size != 3
-    markers.min == markers.max
   end
 
   def reset
@@ -112,6 +91,14 @@ class Board
     puts "  #{get_square_at(7)}  |  #{get_square_at(8)}  |  #{get_square_at(9)}"
     puts "     |     |"
     puts ""
+  end  
+  
+  private
+
+  def three_identical_markers?(squares)
+    markers = squares.select(&:marked?).collect(&:marker)
+    return false if markers.size != 3
+    markers.min == markers.max
   end
 end
 
@@ -147,13 +134,16 @@ end
 class TTTGame
   HUMAN_MARKER = 'X'
   COMPUTER_MARKER = 'O'
+  FIRST_TO_MOVE = HUMAN_MARKER
 
   attr_reader :board, :human, :computer
+  attr_accessor :current_turn
 
   def initialize
     @board = Board.new
     @human = Player.new(HUMAN_MARKER)
     @computer = Player.new(COMPUTER_MARKER)
+    @current_turn = FIRST_TO_MOVE
   end
 
   def clear
@@ -220,7 +210,9 @@ class TTTGame
 
   def reset
     board.reset
-    clear
+    current_turn = FIRST_TO_MOVE
+    puts "board has been reset, #{current_turn} goes now"
+    # clear
   end
 
   def display_play_again_message
@@ -228,6 +220,26 @@ class TTTGame
     puts ""
   end
 
+  def human_turn?
+    current_turn == human.marker
+  end
+
+  def switch_turn
+    if current_turn == human.marker
+      self.current_turn = computer.marker
+    else
+      self.current_turn = human.marker
+    end
+  end
+
+  def current_player_moves
+    if current_turn == human.marker
+      human_moves
+    else
+      computer_moves
+    end
+    switch_turn
+  end
 
   def play
     display_welcome_message
@@ -235,13 +247,16 @@ class TTTGame
     loop do
       display_board
       loop do
-        human_moves
+        current_player_moves
         break if board.someone_won? || board.full?
+        # human_moves
+        # break if board.someone_won? || board.full?
         
-        computer_moves
-        break if board.someone_won? || board.full?
+        # computer_moves
+        # break if board.someone_won? || board.full?
 
-        clear_screen_and_display_board
+        clear_screen_and_display_board if human_turn?
+        
       end
       display_result
       break unless play_again?
