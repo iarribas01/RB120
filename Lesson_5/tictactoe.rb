@@ -127,6 +127,8 @@ class Player
   end
 end
 
+# Player = Struct.new(:marker)
+
 class TTTGame
   HUMAN_MARKER = 'X'
   COMPUTER_MARKER = 'O'
