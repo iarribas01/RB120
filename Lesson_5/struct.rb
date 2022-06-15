@@ -30,4 +30,5 @@ puts mary.address.inspect # nil
 puts mary.greeting
 puts ""
 
+# Customer, Struct, Enumerable, Object, Kernel, BasicObject
 p Customer.ancestors
