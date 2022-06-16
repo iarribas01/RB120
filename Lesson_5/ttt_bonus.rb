@@ -33,6 +33,10 @@ class Board
     @squares[num].marker = marker
   end
 
+  def [](index)
+    @squares[index]
+  end
+
   def unmarked_keys
     @squares.keys.select { |key| @squares[key].unmarked? }
   end
@@ -78,6 +82,7 @@ class Board
   private
 
   def three_identical_markers?(squares)
+    # binding.pry
     markers = squares.select(&:marked?).collect(&:marker)
     return false if markers.size != 3
     markers.min == markers.max
@@ -146,35 +151,33 @@ class TTTGame
   end
 
   def computer_moves
-    # iterate through winning lines
     key = nil
 
-    Board::WINNING_LINES.each do |line|
+    Board::WINNING_LINES.each do |line| # iterate through winning lines
       key ||= find_at_risk_square_key(line, human.marker) # find at risk square
-      break if key
+      if key
+        # binding.pry
+        break
+      end
     end
 
     if key # place piece at first at risk square
-      board.squares[key] = computer.marker
-      puts "At risk square detected"
-    else
-      # if no at risk square to be found
-      # choose a random one
-      board[board.unmarked_keys.sample] = computer.marker
-      puts "Random square chosen"
+      # binding.pry
+      board[key].marker = computer.marker
+    else # if no at risk square to be found
+      board[board.unmarked_keys.sample].marker = computer.marker # choose a random one
     end
   end
 
   def find_at_risk_square_key(line, marker)
-    num_marker_in_line = board.squares.values_at(*line).count(marker)
-    # binding.pry
+    squares_in_line = board.squares.values_at(*line)
+    num_marker_in_line = squares_in_line.map(&:marker).count(marker)
     if num_marker_in_line == 2
       line.each do |key|
-        return key if board.unmarked_keys.include? key # select the cross section between two arrays
+        return key if board[key].unmarked? #  select the cross section between two arrays
       end
-    else
-      nil
     end
+    nil
   end
   
   def display_board
@@ -305,8 +308,8 @@ end
 
 game = TTTGame.new
 
-game.board.squares[1] = Square.new('X')
-game.board.squares[2] = Square.new('X')
-game.computer_moves
-# game.play
-game.display_board
+# game.board.squares[1].marker = 'X'
+# game.board.squares[2].marker = 'X'
+# game.computer_moves
+game.play
+# game.display_board
