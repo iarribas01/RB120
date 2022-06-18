@@ -79,6 +79,10 @@ class Board
   end
   # rubocop:enable Metrics/AbcSize
 
+  def center_unmarked?
+    @squares[5].unmarked?
+  end
+
   private
 
   def three_identical_markers?(squares)
@@ -87,6 +91,8 @@ class Board
     return false if markers.size != 3
     markers.min == markers.max
   end
+
+
 end
 
 class Square
@@ -130,41 +136,50 @@ class TTTGame
   WINNING_SCORE = 5
   HUMAN_MARKER = "X"
   COMPUTER_MARKER = "O"
-  FIRST_TO_MOVE = HUMAN_MARKER
 
-  attr_reader :board, :human, :computer
+  attr_reader :board, :human, :computer, :current_marker
 
   def initialize
     @board = Board.new
     @human = Player.new(HUMAN_MARKER)
     @computer = Player.new(COMPUTER_MARKER)
-    @current_marker = FIRST_TO_MOVE
   end
 
   def play
     clear
     display_welcome_message
     obtain_names
+    choose_first_to_move
     main_game
     display_scores
     display_goodbye_message
   end
 
-  def computer_moves
-    key = nil
+  def computer_moves_offense
+    Board::WINNING_LINES.each do |line| # iterate through winning lines
+      key ||= find_at_risk_square_key(line, computer.marker) # find at risk square
+      return key if key
+    end
+    nil
+  end
 
+  def computer_moves_defense
     Board::WINNING_LINES.each do |line| # iterate through winning lines
       key ||= find_at_risk_square_key(line, human.marker) # find at risk square
-      if key
-        # binding.pry
-        break
-      end
+      return key if key
     end
+    nil
+  end
 
-    if key # place piece at first at risk square
-      # binding.pry
+  def computer_moves
+
+    key ||= computer_moves_offense # search for offense move
+    key ||= computer_moves_defense unless key # search for defense if no offense found
+    key = 5 if board.center_unmarked? # default to center
+
+    if key
       board[key].marker = computer.marker
-    else # if no at risk square to be found
+    else
       board[board.unmarked_keys.sample].marker = computer.marker # choose a random one
     end
   end
@@ -215,6 +230,28 @@ class TTTGame
   def display_welcome_message
     puts "Welcome to Tic Tac Toe!"
     puts ""
+  end
+
+  def choose_first_to_move
+    answer = nil
+    loop do
+      puts "Who do you want to go first?"
+      puts "(H) Human. or (C) Computer?"
+      puts "Or, let computer decide. (X)"
+      puts ""
+      answer = gets.chomp.downcase
+      break if %w(h c x).include? answer
+      puts "Invalid input. Must put either H, C, or X."
+      puts ""
+    end
+
+    if answer == 'h'
+      @current_marker = HUMAN_MARKER
+    elsif answer == 'c'
+      @current_marker = COMPUTER_MARKER
+    elsif answer == 'x'
+      @current_marker = [HUMAN_MARKER, COMPUTER_MARKER].sample
+    end
   end
 
   def obtain_names
@@ -296,7 +333,7 @@ class TTTGame
 
   def reset
     board.reset
-    @current_marker = FIRST_TO_MOVE
+    @current_marker = @first_to_move
     clear
   end
 
