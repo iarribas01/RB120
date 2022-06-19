@@ -134,21 +134,23 @@ end
 
 class TTTGame
   WINNING_SCORE = 5
-  HUMAN_MARKER = "X"
-  COMPUTER_MARKER = "O"
+  @human_marker = "X"
+  @computer_marker = "O"
 
   attr_reader :board, :human, :computer, :current_marker
+  attr_accessor :human_marker, :computer_marker
 
   def initialize
     @board = Board.new
-    @human = Player.new(HUMAN_MARKER)
-    @computer = Player.new(COMPUTER_MARKER)
+    @human = Player.new(human_marker)
+    @computer = Player.new(computer_marker)
   end
 
   def play
     clear
     display_welcome_message
     obtain_names
+    choose_markers if choose_marker?
     choose_first_to_move
     main_game
     display_scores
@@ -201,7 +203,35 @@ class TTTGame
     board.draw
     puts ""
   end
+  
+  def choose_marker?
+    loop do 
+      puts "Would you like to choose your marker? (y or n)"
+      answer = gets.chomp.downcase
+      if %w(y n).include? answer
+        return answer == 'y'
+      end
+      puts "Invalid answer. Must put y or n.\n"
+    end
+  end
 
+  def choose_markers
+    answer = nil
+    loop do 
+      puts "Choose your marker: "
+      answer = gets.chomp
+      break if answer.size == 1
+      puts "Invalid answer. Marker can only be one character long."
+    end
+
+    self.human_marker = answer
+    human.marker = human_marker
+
+    while computer_marker == human_marker
+      self.computer_marker = rand(33..110).chr.first # any random printable character
+    end
+    computer.marker = computer_marker
+  end
   private
 
   def someone_won?
@@ -246,17 +276,19 @@ class TTTGame
     end
 
     if answer == 'h'
-      @current_marker = HUMAN_MARKER
+      @current_marker = human_marker
     elsif answer == 'c'
-      @current_marker = COMPUTER_MARKER
+      @current_marker = computer_marker
     elsif answer == 'x'
-      @current_marker = [HUMAN_MARKER, COMPUTER_MARKER].sample
+      @current_marker = [human_marker, computer_marker].sample
     end
   end
 
   def obtain_names
 
   end
+
+
 
   def display_goodbye_message
     puts "Thanks for playing Tic Tac Toe! Goodbye!"
@@ -268,7 +300,7 @@ class TTTGame
   end
 
   def human_turn?
-    @current_marker == HUMAN_MARKER
+    @current_marker == human_marker
   end
 
 
@@ -287,10 +319,10 @@ class TTTGame
   def current_player_moves
     if human_turn?
       human_moves
-      @current_marker = COMPUTER_MARKER
+      @current_marker = computer_marker
     else
       computer_moves
-      @current_marker = HUMAN_MARKER
+      @current_marker = human_marker
     end
   end
 
@@ -343,8 +375,9 @@ class TTTGame
   end
 end
 
-game = TTTGame.new
 
+game = TTTGame.new
+game.choose_markers
 # game.board.squares[1].marker = 'X'
 # game.board.squares[2].marker = 'X'
 # game.computer_moves
