@@ -118,8 +118,8 @@ class Square
 end
 
 class Player
-  attr_reader :marker, :score
-  attr_accessor :name
+  attr_reader :score
+  attr_accessor :name, :marker
 
   def initialize(marker)
     @marker = marker
@@ -134,14 +134,16 @@ end
 
 class TTTGame
   WINNING_SCORE = 5
-  @human_marker = "X"
-  @computer_marker = "O"
+  # @human_marker = "X"
+  # @computer_marker = "O"
 
   attr_reader :board, :human, :computer, :current_marker
   attr_accessor :human_marker, :computer_marker
 
   def initialize
     @board = Board.new
+    @human_marker = "X"
+    @computer_marker = "O"
     @human = Player.new(human_marker)
     @computer = Player.new(computer_marker)
   end
@@ -149,7 +151,7 @@ class TTTGame
   def play
     clear
     display_welcome_message
-    obtain_names
+    choose_names
     choose_markers if choose_marker?
     choose_first_to_move
     main_game
@@ -198,7 +200,7 @@ class TTTGame
   end
   
   def display_board
-    puts "You're a #{human.marker}. Computer is a #{computer.marker}."
+    puts "#{human.name} is a #{human.marker}. #{computer.name} is a #{computer.marker}."
     puts ""
     board.draw
     puts ""
@@ -216,9 +218,21 @@ class TTTGame
   end
 
   def choose_markers
+    choose_player_marker
+    choose_computer_marker
+  end
+
+  def choose_computer_marker
+    if human_marker == 'O'
+      self.computer_marker = 'X'
+      computer.marker = computer_marker
+    end
+  end
+
+  def choose_player_marker
     answer = nil
     loop do 
-      puts "Choose your marker: "
+      puts "Choose your marker:"
       answer = gets.chomp
       break if answer.size == 1
       puts "Invalid answer. Marker can only be one character long."
@@ -226,13 +240,17 @@ class TTTGame
 
     self.human_marker = answer
     human.marker = human_marker
-
-    while computer_marker == human_marker
-      self.computer_marker = rand(33..110).chr.first # any random printable character
-    end
-    computer.marker = computer_marker
   end
   private
+
+  def generate_random_maker
+    marker = nil
+    loop do 
+      marker = rand(33..110).chr # any random printable character
+      break if marker.size == 1 # ensure double characters not returned
+    end
+    marker
+  end
 
   def someone_won?
     computer.score == WINNING_SCORE || human.score == WINNING_SCORE
@@ -266,26 +284,39 @@ class TTTGame
     answer = nil
     loop do
       puts "Who do you want to go first?"
-      puts "(H) Human. or (C) Computer?"
-      puts "Or, let computer decide. (X)"
+      puts "(A) #{human.name}. or (B) #{computer.name}?"
+      puts "Or, let computer decide. (C)"
       puts ""
       answer = gets.chomp.downcase
-      break if %w(h c x).include? answer
-      puts "Invalid input. Must put either H, C, or X."
+      break if %w(a b c).include? answer
+      puts "Invalid input. Must put either A, B, or C."
       puts ""
     end
 
     if answer == 'h'
-      @current_marker = human_marker
+      @current_marker = human.marker
     elsif answer == 'c'
-      @current_marker = computer_marker
+      @current_marker = computer.marker
     elsif answer == 'x'
-      @current_marker = [human_marker, computer_marker].sample
+      @current_marker = [human.marker, computer.marker].sample
     end
   end
 
-  def obtain_names
+  def choose_names
+    puts "Enter your name: "
+    answer = gets.chomp
 
+    if answer.empty?
+      human.name = "human"
+    else
+      human.name = answer
+    end
+
+    if human.name == "human"
+      computer.name = "computer"
+    else
+      computer.name = ["Siri", "Alexa", "One-one"].sample
+    end
   end
 
 
@@ -343,8 +374,8 @@ class TTTGame
   end
 
   def display_scores
-    puts "Human has a score of #{human.score}."
-    puts "Computer has a score of #{computer.score}."
+    puts "#{human.name} has a score of #{human.score}."
+    puts "#{computer.name} has a score of #{computer.score}."
   end
 
   def play_again?
@@ -377,7 +408,6 @@ end
 
 
 game = TTTGame.new
-game.choose_markers
 # game.board.squares[1].marker = 'X'
 # game.board.squares[2].marker = 'X'
 # game.computer_moves
