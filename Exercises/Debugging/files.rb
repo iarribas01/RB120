@@ -1,5 +1,26 @@
+=begin
+
+problem: NameError, uninitialized constant File::FORMAT
+  constants have a lexical scope and will only
+  try to resolve a constant travelling up an inheritance
+  tree, not down
+
+solution 1:
+  - rewrite the to_s method in File and copy and past
+    the to_s method in all subclasses to use FORMAT of
+    respective class
+
+      super + FORMAT.to_s
+
+    - access first by current class instance and
+    then by respective constant. self.class.CONSTANT
+
+
+
+=end
+
 class File
-  attr_accessor :name, :byte_content
+  attr_accessor :name, :byte_content, :format
 
   def initialize(name)
     @name = name
@@ -16,7 +37,7 @@ class File
   end
 
   def to_s
-    "#{name}.#{FORMAT}"
+    "#{name}.#{self.class::FORMAT}"
   end
 end
 
