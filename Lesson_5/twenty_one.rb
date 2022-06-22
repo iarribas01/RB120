@@ -1,43 +1,3 @@
-=begin
-  Goal: get highest to 21 without going over
-
-  Turn:
-    Player
-      hit: can hit as many times as they
-           want without "busting"
-      stay: ends their turn
-
-    Dealer
-      hit: can hit as many times as they
-           want without "busting"
-      stay: ends their turn but not allowed
-            until hand is at least 17
-  
-  Player goes first, then dealer goes, game
-  will halt as soon as someone busts. Final
-  comparison made after both dealer and player
-  have made their moves without busting.
-  The one with the greatest score wins
-
-  Noun: Hand, Card, Player, Dealer, deck, game, total
-  Verb: Bust, hit, stay, deal
-
-  Player
-    busted?, hit, stay, total
-  
-  Dealer
-    busted? hit, stay total deal
-  
-  Participant
-
-  Deck 
-    def (should this be here or in dealer)
-
-  Card
-  Game
-    start
-=end
-
 class Participant
   attr_accessor :cards
 
@@ -50,76 +10,68 @@ class Participant
   end
 
   def hand_total
-    total = cards.map(&:value).inject(:+)
+    total = cards.map(&:value).inject(:+) # calculates sum of faces of the cards
 
     # adjust hand total depending on how many aces
-    if total > TwentyOneGame::TOTAL_LIMIT && has_ace?
+    if total > TwentyOneGame::TOTAL_LIMIT && ace?
       counter = 0
       # continue to adjust total until total is <= limit for as many aces as there are
-      until counter == num_aces || total <= TwentyOneGame::TOTAL_LIMIT 
+      until counter == num_aces || total <= TwentyOneGame::TOTAL_LIMIT
         total -= 10 # substract 11 for default val, add 1 for adjusted val
         counter += 1
       end
-      total
-    else
-      total
     end
+    total
   end
 
-  def has_ace?
-    cards.any? {|c| c.face == 'ace'}
+  def ace?
+    cards.any?(&:ace?)
   end
 
   def num_aces
-    cards.count {|c| c.face == 'ace'}
+    cards.count(&:ace?)
   end
 
   def display_hand_total
     puts "#{self.class} total is #{hand_total}"
   end
-
-  def reveal_hand
-    puts self.class.to_s + "\t" +cards.map(&:face).join(', ')
-  end
 end
 
 class Player < Participant
-  def hit(deck)
-    deck.deal(self)
-  end
-
-  def hand
+  def hand_faces_and_suits
     cards.join(', ')
   end
 
-  def hand_values
+  def hand_faces
     cards.map(&:face).join(', ')
   end
 
   def display_hand
-    puts "PLAYER hand:\t#{hand_values}"
+    puts "PLAYER hand:\t#{hand_faces}"
   end
 end
-
 
 class Dealer < Participant
   def reached_minimum?
     hand_total >= TwentyOneGame::DEALER_MINIMUM
   end
 
-  def hand
-    ([cards.first] + (["unknown"] * (cards.length-1))).join(', ')
+  def hand_faces_and_suits
+    ([cards.first] + (['unknown'] * (cards.length - 1))).join(', ')
   end
 
-  def hand_values
-    ([cards.first.face] + (["unknown"] * (cards.length-1))).join(', ')
+  def hand_faces
+    ([cards.first.face] + (['unknown'] * (cards.length - 1))).join(', ')
   end
 
   def display_hand
-    puts "DEALER hand:\t#{hand_values}"
+    puts "DEALER hand:\t#{hand_faces}"
+  end
+
+  def reveal_hand
+    puts self.class.to_s.upcase + " hand:\t" + cards.map(&:face).join(', ')
   end
 end
-
 
 class Deck
   attr_accessor :cards
@@ -129,7 +81,7 @@ class Deck
   end
 
   def reset!
-    self.cards = [] 
+    self.cards = []
     Card::SUITS.each do |suit|
       Card::FACES.each do |face|
         cards << Card.new(face, suit)
@@ -148,9 +100,8 @@ class Deck
 end
 
 class Card
-  SUITS = ['H', 'D', 'S', 'C']
-  FACES = ['2', '3', '4', '5', '6', '7', '8', '9', '10',
-           'J', 'Q', 'K', 'A' ]
+  SUITS = %w[H D S C].freeze
+  FACES = %w[2 3 4 5 6 7 8 9 10 J Q K A].freeze
 
   def initialize(face, suit)
     @face = face
@@ -180,9 +131,6 @@ class Card
     end
   end
 
-  # HAVE TO DECIDE WHERE TO PLACE ACE VALUE
-    # needs to know what cards player has
-
   def value
     case @face
     when 'J' then 10
@@ -193,7 +141,9 @@ class Card
     end
   end
 
-
+  def ace?
+    @face == 'A'
+  end
 end
 
 class TwentyOneGame
@@ -201,6 +151,7 @@ class TwentyOneGame
   NUM_INITIAL_CARDS = 2
   TOTAL_LIMIT = 21
   DEALER_MINIMUM = 17
+  PAUSE_TIME = 2 # seconds
 
   def initialize
     @deck = Deck.new
@@ -209,17 +160,94 @@ class TwentyOneGame
   end
 
   def display_welcome_message
-    puts "Welcome to Twenty-One!"
+    puts "Welcome to Twenty-One!\n"
   end
 
   def display_goodbye_message
-    puts "Thanks for playing Twenty-One! Goodbye!"
+    puts "\nThanks for playing Twenty-One! Goodbye!"
   end
 
   def deal_initial_cards
-    [player, dealer].each do |participant|
-      deck.deal(participant, NUM_INITIAL_CARDS)
+    deck.deal(player, NUM_INITIAL_CARDS)
+    deck.deal(dealer, NUM_INITIAL_CARDS)
+  end
+
+  def show_hands
+    puts
+    player.display_hand
+    dealer.display_hand
+  end
+
+  def choose_move
+    loop do
+      puts
+      puts 'Would you like to hit or stay? (h or s)'
+      answer = gets.chomp.downcase
+      return answer if %w[h s].include? answer
+
+      puts 'Invalid answer, must input h or s.'
     end
+  end
+
+  def player_hit
+    puts 'PLAYER chose to hit!'
+    pause_and_clear_screen
+    deck.deal(player)
+  end
+
+  def player_turn
+    loop do
+      show_hands
+      move = choose_move
+      if move == 'h' # HIT
+        player_hit
+        if player.busted?
+          puts 'PLAYER has busted!'
+          break
+        end
+      elsif move == 's' # STAY
+        puts 'PLAYER chose to stay!'
+        break
+      end
+    end
+    pause_and_clear_screen
+  end
+
+  def dealer_turn
+    num_cards_drawn = 0
+    until dealer.busted? || dealer.reached_minimum?
+      deck.deal(dealer)
+      num_cards_drawn += 1
+    end
+    puts "DEALER has drawn #{num_cards_drawn} cards."
+    pause_and_clear_screen
+  end
+
+  def show_result
+    if player.busted?
+      puts 'PLAYER has busted. DEALER wins!'
+    elsif dealer.busted?
+      puts 'DEALER has busted. PLAYER wins!'
+    elsif player.hand_total > dealer.hand_total
+      puts 'PLAYER has won'
+    elsif player.hand_total < dealer.hand_total
+      puts 'DEALER has won'
+    else
+      puts 'PLAYER and dealer have tied!'
+    end
+  end
+
+  def reveal_all_hands
+    puts
+    puts '============= Final cards ============='
+    player.display_hand
+    dealer.reveal_hand
+    puts '======================================='
+  end
+
+  def pause_and_clear_screen
+    sleep(PAUSE_TIME)
+    system 'clear'
   end
 
   def start
@@ -228,78 +256,11 @@ class TwentyOneGame
     display_goodbye_message
   end
 
-  def show_hands
-    player.display_hand
-    dealer.display_hand
-  end
-
-
-  def choose_move
-    loop do
-      puts "Would you like to hit or stay? (h or s)"
-      answer = gets.chomp.downcase
-      return answer if %w(h s).include? answer
-      puts "Invalid answer, must input h or s."
-    end
-  end
-
-  def player_turn
-    loop do
-      show_hands
-      move = choose_move
-      if move == 'h' # HIT
-        puts "Player chose to hit!"
-        player.hit(deck)
-        if player.busted?
-          puts "Player has busted!"
-          break
-        end
-      elsif move == 's' # STAY
-        puts "Player chose to stay!"
-        break
-      end
-    end
-  end
-
-  def dealer_turn
-    # hit until hand value total is at least 17
-    # computer run
-    until dealer.busted? || dealer.reached_minimum? 
-      deck.deal(dealer)
-      puts "Dealer has drawn a card!"
-    end
-  end
-
-  def show_result
-    player_total = player.hand_total
-    dealer_total = dealer.hand_total
-    if player.busted?
-      puts "Player has busted. Dealer wins!"
-    elsif dealer.busted?
-      puts "Dealer has busted. Player wins!"
-    elsif player_total > dealer_total
-      puts "Player has won "
-    elsif player_total < dealer_total
-      puts "Dealer has won"
-    else
-      puts "Player and dealer have tied!"
-    end
-  end
-
-  def reveal_all_hands
-    player.reveal_hand
-    dealer.reveal_hand
-  end
-
-  def clear
-    system 'clear'
-  end
-
   def main_game
     deck.shuffle!
     deal_initial_cards
     player_turn
-    dealer_turn
+    dealer_turn unless player.busted?
     show_result
     reveal_all_hands
   end
