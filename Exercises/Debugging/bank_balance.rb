@@ -17,8 +17,9 @@ class BankAccount
   end
 
   def withdraw(amount)
-    if amount > 0 && valid_transaction?(balance - amount)
-      self.balance -= amount
+    if amount > 0
+      success = (self.balance -= amount)
+      puts "success = #{success}"
     else
       success = false
     end
@@ -31,7 +32,12 @@ class BankAccount
   end
 
   def balance=(new_balance)
-    @balance = new_balance
+    if valid_transaction?(new_balance)
+      @balance = new_balance
+      true
+    else
+      false
+    end
   end
 
   def valid_transaction?(new_balance)
