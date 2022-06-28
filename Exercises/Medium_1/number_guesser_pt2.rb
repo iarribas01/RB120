@@ -1,35 +1,10 @@
-=begin
-Guessing game is a text-based game
-where the user has a LIMIT of n guesses
-per game and must guess numbers in range 1-100.
-
-Nouns: limit, answer, remaining guesses, game
-Verbs: guess
-
-Game
-  limit
-  answer
-  remaining guesses
-
-  methods: 
-    guess
-    compare
-    validate
-
-    FE: I don't think there should be a player
-    class because it is not needed.
-    Since this is a one-player game and we don't
-    need to store any data related to the player,
-    aside from user_guess and possibly guesses_remaining
-    we can simplify the program by ommitting the Player class.
-    Say we wanted to be able to change how many players
-    can play, a player class would be needed.
-
-=end
-
 class GuessingGame
-  RANGE = 1..100
-  GUESSES_PER_GAME = 7
+
+  def initialize(low, high)
+    @range = low..high
+    @guesses_per_game = Math.log2(@range.size).to_i + 1
+    @number = nil
+  end
 
   def play
     reset
@@ -53,13 +28,13 @@ class GuessingGame
   end
 
   def reset
-    @remaining_guesses = GUESSES_PER_GAME
+    @remaining_guesses = guesses_per_game
     @user_guess = nil
     generate_new_number
   end
 
   def generate_new_number
-    self.number = rand(RANGE)
+    self.number = rand(range)
   end
   
   def decrement_remaining_guesses
@@ -93,7 +68,7 @@ class GuessingGame
 
   def get_user_guess
     loop do
-      print "Enter a number between #{RANGE.min} and #{RANGE.max}: "
+      print "Enter a number between #{range.min} and #{range.max}: "
       self.user_guess = gets.chomp.to_i
       break if valid_guess?
       print "Invalid guess. "
@@ -101,18 +76,19 @@ class GuessingGame
   end
 
   def valid_guess?
-    (1..100).include?(user_guess)
+    ((range.min)..(range.max)).cover?(user_guess)
   end
 
   def display_remaining_guesses
     puts "You have #{remaining_guesses} guesses remaining."
   end
 
+  attr_reader :range, :guesses_per_game
   attr_accessor :number, :user_guess, :remaining_guesses
 end
 
 
-game = GuessingGame.new
+game = GuessingGame.new(501, 1500)
 
 game.play
 game.play
